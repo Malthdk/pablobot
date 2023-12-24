@@ -6,10 +6,15 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
+    "@elysiajs/cron": "^0.7.0",
     "elysia": "latest"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/node-telegram-bot-api": "^0.64.1",
+    "bun-types": "latest",
+    "node-telegram-bot-api": "^0.64.0",
+    "openai": "^4.24.1",
+    "puppeteer": "^21.6.1"
   },
   "module": "src/index.js"
 }
