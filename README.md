@@ -1,15 +1,12 @@
-# Elysia with Bun runtime
+# Pablo bot
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
-```
+## Idea
+The idea of this is to make a server that uses a cron job to daily generate art related to the weather forecast. It does so by using a web scraper to get weather forecast, then uses gpt to generate a prompt from that, then uses dalle 3 to generate the image and send it via Telegram.
 
 ## Development
 To start the development server run:
 ```bash
-bun run dev
+bun dev
 ```
 
-Open http://localhost:3000/ with your browser to see the result.
+Open http://localhost:8080/ with your browser to trigger the / get handler.

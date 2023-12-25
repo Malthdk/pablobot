@@ -32,7 +32,7 @@ export const handler = async () => {
       {
         role: "system",
         content:
-          "You will act as a prompt generator. I will describe weather conditions for you, and you will create a prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cubism, surrealism, abstract, digital art or impressionism. You must pick a style randomly.",
+          "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cubism, surrealism, abstract, digital art or impressionism. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
       },
       { role: "user", content: weatherForecast },
     ],
@@ -40,19 +40,20 @@ export const handler = async () => {
   });
 
   const prompt = completion.choices[0].message.content;
-  return prompt;
+  console.log(prompt);
+
   if (!prompt) return "No prompt generated";
 
-  //   const image = await openai.images.generate({
-  //     model: "dall-e-3",
-  //     prompt,
-  //     n: 1,
-  //     size: "1024x1024",
-  //   });
+  const image = await openai.images.generate({
+    model: "dall-e-3",
+    prompt,
+    n: 1,
+    size: "1024x1024",
+  });
 
-  //   if (!image.data[0].url) return "No image generated";
+  if (!image.data[0].url) return "No image generated";
 
-  //   if (image) bot.sendPhoto(credentials.chatId, image.data[0].url);
+  if (image) bot.sendPhoto(credentials.chatId, image.data[0].url);
 };
 
 bot.on("message", handler);

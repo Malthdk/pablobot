@@ -2,8 +2,10 @@
   "name": "pablobot",
   "version": "1.0.50",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build --target node src/index.ts",
+    "start": "NODE_ENV=production bun src/index.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "@elysiajs/cron": "^0.7.0",
@@ -14,7 +16,8 @@
     "bun-types": "latest",
     "node-telegram-bot-api": "^0.64.0",
     "openai": "^4.24.1",
-    "puppeteer": "^21.6.1"
+    "puppeteer": "^21.6.1",
+    "typescript": "^5.3.3"
   },
   "module": "src/index.js"
 }
