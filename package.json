@@ -5,7 +5,8 @@
     "dev": "bun --watch src/index.ts",
     "build": "bun build --target node src/index.ts",
     "start": "NODE_ENV=production bun src/index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "build:daemon": "bun add -d pm2 && pm2 start pm2.config.js"
   },
   "dependencies": {
     "@elysiajs/cron": "^0.7.0",
