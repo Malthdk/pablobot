@@ -3,7 +3,7 @@ import { handler } from "./bot";
 
 const cron = require("node-cron");
 
-const server = fastify({ logger: true });
+const server = fastify();
 
 server.get("/", handler);
 cron.schedule("0 6 * * *", handler);
