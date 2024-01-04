@@ -35,16 +35,11 @@ export const getWeatherForecast = async (url: string) => {
 };
 
 export const handler = async () => {
-  const weatherForecast = await scraper(
-    "https://www.dmi.dk/lokation/show/DK/2618425/K%C3%B8benhavn/",
-    ".weather-forecast"
-  );
-
-  const test = await getWeatherForecast(
+  const weatherForecast = await getWeatherForecast(
     "https://www.dmi.dk/dmidk_byvejrWS/rest/texts/2618425"
   );
 
-  if (!test) return "No weather forecast found!!!!!";
+  if (!weatherForecast) return "No weather forecast found!!!!!";
 
   try {
     const completion = await openai.chat.completions.create({
@@ -54,7 +49,7 @@ export const handler = async () => {
           content:
             "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cubism, surrealism, abstract, digital art or impressionism. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
         },
-        { role: "user", content: test },
+        { role: "user", content: weatherForecast },
       ],
       model: "gpt-4",
     });
