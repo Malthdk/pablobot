@@ -1,23 +1,14 @@
+import { FastifyRequest } from "fastify";
 import Telegram from "node-telegram-bot-api";
 import { OpenAI } from "openai";
+import { CustomSessionObject, getNewAccessTokenUsingRefreshToken } from ".";
 import { credentials } from "./credentials";
+import { addGoogleImage, getUploadToken, removeGoogleImage } from "./google";
+
+const normalRes = "1792x1024";
 
 const bot = new Telegram(credentials.telegramToken, { polling: true });
 const openai = new OpenAI({ apiKey: credentials.openAIKey });
-
-// Scraper with puppeteer - not used as puppeteer is not supported on pm2
-// export const scraper = async (url: string, selector: string) => {
-//   const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto(url);
-
-//   await page.waitForSelector(selector);
-//   const data = await page.$eval(selector, (el) => el.textContent);
-
-//   await browser.close();
-
-//   return data;
-// };
 
 export const getWeatherForecast = async (url: string) => {
   try {
@@ -34,7 +25,14 @@ export const getWeatherForecast = async (url: string) => {
   }
 };
 
-export const handler = async () => {
+export const handler = async (request: FastifyRequest) => {
+  const token = await getNewAccessTokenUsingRefreshToken(request);
+
+  const key = token.access_token;
+  const previousImageId = (request.session as CustomSessionObject)
+    .previousImageId;
+
+  console.log("previousImageId", previousImageId);
   const weatherForecast = await getWeatherForecast(
     "https://www.dmi.dk/dmidk_byvejrWS/rest/texts/2618425"
   );
@@ -47,7 +45,7 @@ export const handler = async () => {
         {
           role: "system",
           content:
-            "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cubism, surrealism, abstract, digital art or impressionism. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
+            "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a detailed prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cubism, surrealism, abstract, digital art or impressionism. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
         },
         { role: "user", content: weatherForecast },
       ],
@@ -63,12 +61,28 @@ export const handler = async () => {
       model: "dall-e-3",
       prompt,
       n: 1,
-      size: "1024x1024",
+      size: normalRes,
     });
 
     if (!image.data[0].url) return "No image generated";
 
-    if (image) bot.sendPhoto(credentials.chatId, image.data[0].url);
+    console.log("Image binary", image.data[0]);
+    let blob = await fetch(image.data[0].url).then((r) => r.blob());
+
+    const uploadToken = await getUploadToken(key, blob);
+
+    const mediaItem = await addGoogleImage(key, uploadToken, prompt);
+
+    if (previousImageId) {
+      await removeGoogleImage(key, previousImageId);
+    }
+
+    (request.session as CustomSessionObject).previousImageId =
+      mediaItem.newMediaItemResults[0].mediaItem.id;
+
+    console.log("Successfully uploaded image to Google Photos");
+    return "Successfully uploaded image to Google Photos";
+    // console.log("google create", mediaItem.newMediaItemResults[0].mediaItem);
   } catch (error: any) {
     console.error(error);
     bot.sendMessage(credentials.chatId, error.message);

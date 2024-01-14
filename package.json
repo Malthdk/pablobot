@@ -13,14 +13,23 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cookie": "^9.2.0",
+    "@fastify/oauth2": "^7.8.0",
+    "@fastify/session": "^10.7.0",
     "fastify": "^4.25.2",
+    "googleapis": "^130.0.0",
+    "googlephotos": "^0.3.5",
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.64.0",
-    "openai": "^4.24.1"
+    "openai": "^4.24.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "simple-get": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
     "@types/node-telegram-bot-api": "^0.64.1",
+    "@types/passport-google-oauth20": "^2.0.14",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.0.2",
     "ts-node": "^10.9.2",
