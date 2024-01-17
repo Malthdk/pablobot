@@ -26,6 +26,7 @@ export const getWeatherForecast = async (url: string) => {
 };
 
 export const handler = async (request: FastifyRequest) => {
+  bot.on("polling_error", (msg) => console.log(msg));
   const token = await getNewAccessTokenUsingRefreshToken(request);
 
   const key = token.access_token;
@@ -72,6 +73,11 @@ export const handler = async (request: FastifyRequest) => {
     const uploadToken = await getUploadToken(key, blob);
 
     const mediaItem = await addGoogleImage(key, uploadToken, prompt);
+
+    if (!mediaItem || !mediaItem.newMediaItemResults[0]) {
+      console.log("Failed to retrieve media item from Google Photos");
+      return "Failed to retrieve media item from Google Photos";
+    }
 
     if (previousImageId) {
       await removeGoogleImage(key, previousImageId);
