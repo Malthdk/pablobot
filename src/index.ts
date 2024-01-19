@@ -77,8 +77,6 @@ fastify.get(
 export const getNewAccessTokenUsingRefreshToken = async (
   req: FastifyRequest
 ) => {
-  const token = (req.session as CustomSessionObject).token;
-  console.log("Old token", token);
   const refreshToken =
     (req.session as CustomSessionObject).refreshToken ||
     credentials.refreshToken;
@@ -89,7 +87,6 @@ export const getNewAccessTokenUsingRefreshToken = async (
     await fastify.googleOAuth2.getNewAccessTokenUsingRefreshToken({
       refresh_token: refreshToken,
     });
-  console.log("New token", newToken);
 
   (req.session as CustomSessionObject).token = newToken;
   return newToken;

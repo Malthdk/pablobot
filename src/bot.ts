@@ -17,7 +17,6 @@ export const getWeatherForecast = async (url: string) => {
     await response
       .json()
       .then((data) => (text = data.regiondata[0].products[0].text));
-    console.log(text);
     return text;
   } catch (error) {
     console.error("An error occurred:", error);
@@ -80,7 +79,10 @@ export const handler = async (request: FastifyRequest) => {
     console.log("Upload token", uploadToken);
     const mediaItem = await addGoogleImage(key, uploadToken, prompt);
     console.log("Media item", mediaItem);
-    if (!mediaItem || !mediaItem.newMediaItemResults[0]) {
+    if (
+      mediaItem?.newMediaItemResults.length === 0 ||
+      !mediaItem?.newMediaItemResults[0]
+    ) {
       console.log("Failed to retrieve media item from Google Photos");
       return "Failed to retrieve media item from Google Photos";
     }
@@ -92,7 +94,12 @@ export const handler = async (request: FastifyRequest) => {
     (request.session as CustomSessionObject).previousImageId =
       mediaItem.newMediaItemResults[0].mediaItem.id;
 
-    console.log("Successfully uploaded image to Google Photos");
+    console.log(
+      `Added ${
+        (request.session as CustomSessionObject).previousImageId
+      } to session}`
+    );
+    console.log("Successfully uploaded image to Google Photos 🎉");
     return "Successfully uploaded image to Google Photos";
     // console.log("google create", mediaItem.newMediaItemResults[0].mediaItem);
   } catch (error: any) {
