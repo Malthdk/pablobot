@@ -77,7 +77,11 @@ export const handler = async (request: FastifyRequest) => {
 
     const uploadToken = await getUploadToken(key, blob);
     console.log("Upload token", uploadToken);
-    const mediaItem = await addGoogleImage(key, uploadToken, prompt);
+    const mediaItem = await addGoogleImage(
+      key,
+      uploadToken,
+      prompt.substring(0, 950)
+    );
     console.log("Media item", mediaItem);
     if (
       mediaItem?.newMediaItemResults.length === 0 ||
