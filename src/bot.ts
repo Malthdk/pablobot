@@ -66,14 +66,14 @@ export const handler = async (request: FastifyRequest) => {
     });
 
     if (!image.data[0].url) return "No image generated";
-
+    bot.sendPhoto(credentials.chatId, image.data[0].url);
     console.log("Image binary", image.data[0]);
     let blob = await fetch(image.data[0].url).then((r) => r.blob());
 
     const uploadToken = await getUploadToken(key, blob);
-
+    console.log("Upload token", uploadToken);
     const mediaItem = await addGoogleImage(key, uploadToken, prompt);
-
+    console.log("Media item", mediaItem);
     if (!mediaItem || !mediaItem.newMediaItemResults[0]) {
       console.log("Failed to retrieve media item from Google Photos");
       return "Failed to retrieve media item from Google Photos";
