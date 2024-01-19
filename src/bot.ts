@@ -66,9 +66,15 @@ export const handler = async (request: FastifyRequest) => {
     });
 
     if (!image.data[0].url) return "No image generated";
-    bot.sendPhoto(credentials.chatId, image.data[0].url);
+
     console.log("Image binary", image.data[0]);
     let blob = await fetch(image.data[0].url).then((r) => r.blob());
+
+    if (image) {
+      const buffer = await blob.arrayBuffer();
+      const photo = Buffer.from(buffer);
+      bot.sendPhoto(credentials.chatId, photo);
+    }
 
     const uploadToken = await getUploadToken(key, blob);
     console.log("Upload token", uploadToken);
