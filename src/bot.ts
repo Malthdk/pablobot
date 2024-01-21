@@ -3,7 +3,12 @@ import Telegram from "node-telegram-bot-api";
 import { OpenAI } from "openai";
 import { CustomSessionObject, getNewAccessTokenUsingRefreshToken } from ".";
 import { credentials } from "./credentials";
-import { addGoogleImage, getUploadToken, removeGoogleImage } from "./google";
+import {
+  addGoogleImage,
+  getGoogleAlbum,
+  getUploadToken,
+  removeGoogleImage,
+} from "./google";
 
 const normalRes = "1792x1024";
 
@@ -29,10 +34,7 @@ export const handler = async (request: FastifyRequest) => {
   const token = await getNewAccessTokenUsingRefreshToken(request);
 
   const key = token.access_token;
-  const previousImageId = (request.session as CustomSessionObject)
-    .previousImageId;
 
-  console.log("previousImageId", previousImageId);
   const weatherForecast = await getWeatherForecast(
     "https://www.dmi.dk/dmidk_byvejrWS/rest/texts/2618425"
   );
@@ -54,6 +56,9 @@ export const handler = async (request: FastifyRequest) => {
 
     const prompt = completion.choices[0].message.content;
     console.log(prompt);
+
+    const album = await getGoogleAlbum(key);
+    const previousImageId = album ? album.coverPhotoMediaItemId : undefined;
 
     if (!prompt) return "No prompt generated";
 
@@ -105,7 +110,6 @@ export const handler = async (request: FastifyRequest) => {
     );
     console.log("Successfully uploaded image to Google Photos 🎉");
     return "Successfully uploaded image to Google Photos";
-    // console.log("google create", mediaItem.newMediaItemResults[0].mediaItem);
   } catch (error: any) {
     console.error(error);
     bot.sendMessage(credentials.chatId, error.message);

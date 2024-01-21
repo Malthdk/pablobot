@@ -34,6 +34,23 @@ export const addGoogleImage = async (
   return mediaItem;
 };
 
+export const getGoogleAlbum = async (key: string) => {
+  const googleAlbum = await fetch(
+    `https://photoslibrary.googleapis.com/v1/albums/${ALBUM_ID}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${key}`,
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+    }
+  );
+
+  const album = await googleAlbum.json();
+  return album;
+};
+
 export const removeGoogleImage = async (key: string, imageId: string) => {
   const removeResponse = await fetch(
     `https://photoslibrary.googleapis.com/v1/albums/${ALBUM_ID}:batchRemoveMediaItems`,
