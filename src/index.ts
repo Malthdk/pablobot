@@ -1,14 +1,15 @@
 import { fastifyCookie } from "@fastify/cookie";
 import oauthPlugin from "@fastify/oauth2";
 import { FastifySessionObject, fastifySession } from "@fastify/session";
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 import fastifyCron from "fastify-cron";
 import { handler } from "./bot";
 import { credentials } from "./credentials";
 require("log-timestamp");
-
-const fastify = require("fastify")();
-
 export interface CustomSessionObject extends FastifySessionObject {
   token: {
     access_token: string;
@@ -22,40 +23,43 @@ export interface CustomSessionObject extends FastifySessionObject {
   previousImageId: string;
 }
 
-fastify.get("/", handler);
-fastify.register(fastifyCookie);
-fastify.register(fastifySession, {
+const server = fastify({
+  logger: true,
+});
+
+server.get("/", handler);
+server.register(fastifyCookie);
+server.register(fastifySession, {
   cookieName: "pablo",
   secret: "a secret with minimum length of 32 characters",
   cookie: { secure: false },
-  expires: 1800000,
 });
 
-fastify.register(fastifyCron, {
+server.register(fastifyCron, {
   jobs: [
     {
-      // Only these two properties are required,
-      // the rest is from the node-cron API:
-      // https://github.com/kelektiv/node-cron#api
-      // cronTime: "0 6 * * *",
-      cronTime: "30 * * * *",
-
+      name: "Daily cron job",
+      cronTime: "0 6 * * *",
       // Note: the callbacks (onTick & onComplete) take the server
       // as an argument, as opposed to nothing in the node-cron API:
-      onTick: (fastify: FastifyInstance) => {
-        console.log("cron job running");
-        fastify.get("/", handler);
-        fastify.log.info("cron job running");
+      onTick: async (fastify: FastifyInstance) => {
+        try {
+          const response = await fastify.inject("/");
+          console.log(response.json());
+        } catch (err) {
+          console.error(err);
+        }
       },
       onComplete: (fastify: FastifyInstance) => {
         console.log("cron job completed");
         fastify.log.info("cron job completed");
       },
+      startWhenReady: true,
     },
   ],
 });
 
-fastify.register(oauthPlugin, {
+server.register(oauthPlugin, {
   name: "googleOAuth2",
   scope: [
     "openid",
@@ -81,14 +85,13 @@ fastify.register(oauthPlugin, {
   checkStateFunction: () => true,
 });
 
-fastify.get(
+server.get(
   "/auth/google/callback",
   async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const { token } =
-        await fastify.googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(
-          request
-        );
+      const { token } = await (
+        server as any
+      ).googleOAuth2.getAccessTokenFromAuthorizationCodeFlow(request);
       (request.session as CustomSessionObject).token = token;
       (request.session as CustomSessionObject).refreshToken =
         token.refresh_token;
@@ -109,20 +112,21 @@ export const getNewAccessTokenUsingRefreshToken = async (
 
   if (!refreshToken) throw new Error("No refresh token found");
 
-  const { token: newToken } =
-    await fastify.googleOAuth2.getNewAccessTokenUsingRefreshToken({
-      refresh_token: refreshToken,
-    });
+  const { token: newToken } = await (
+    server as any
+  ).googleOAuth2.getNewAccessTokenUsingRefreshToken({
+    refresh_token: refreshToken,
+  });
 
   (req.session as CustomSessionObject).token = newToken;
   return newToken;
 };
 
-fastify.listen({ port: 8080 }, (err: any, address: any) => {
+server.listen({ port: 8080 }, (err: any, address: any) => {
   if (err) {
     console.error(err);
     process.exit(1);
   }
-  fastify.cron.startAllJobs();
+  server.cron.startAllJobs();
   console.log(`Started server at ${address}`);
 });
