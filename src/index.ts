@@ -39,7 +39,7 @@ server.register(fastifyCron, {
   jobs: [
     {
       name: "Daily cron job",
-      cronTime: "30 * * * *",
+      cronTime: "0 6 * * *",
       // Note: the callbacks (onTick & onComplete) take the server
       // as an argument, as opposed to nothing in the node-cron API:
       onTick: async (fastify: FastifyInstance) => {
