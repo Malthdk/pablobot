@@ -9,6 +9,7 @@ import {
   getUploadToken,
   removeGoogleImage,
 } from "./google";
+require("log-timestamp");
 
 const normalRes = "1792x1024";
 

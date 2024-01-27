@@ -5,6 +5,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fastifyCron from "fastify-cron";
 import { handler } from "./bot";
 import { credentials } from "./credentials";
+require("log-timestamp");
 
 const fastify = require("fastify")();
 
@@ -36,13 +37,19 @@ fastify.register(fastifyCron, {
       // Only these two properties are required,
       // the rest is from the node-cron API:
       // https://github.com/kelektiv/node-cron#api
-      cronTime: "0 6 * * *", // Everyday at midnight UTC
+      // cronTime: "0 6 * * *",
+      cronTime: "30 * * * *",
 
       // Note: the callbacks (onTick & onComplete) take the server
       // as an argument, as opposed to nothing in the node-cron API:
       onTick: (fastify: FastifyInstance) => {
+        console.log("cron job running");
         fastify.get("/", handler);
         fastify.log.info("cron job running");
+      },
+      onComplete: (fastify: FastifyInstance) => {
+        console.log("cron job completed");
+        fastify.log.info("cron job completed");
       },
     },
   ],
