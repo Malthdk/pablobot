@@ -1,6 +1,7 @@
 import { FastifyRequest } from "fastify";
 import Telegram from "node-telegram-bot-api";
 import { OpenAI } from "openai";
+import * as xml2js from "xml2js";
 import { CustomSessionObject, getNewAccessTokenUsingRefreshToken } from ".";
 import { credentials } from "./credentials";
 import {
@@ -9,6 +10,7 @@ import {
   getUploadToken,
   removeGoogleImage,
 } from "./google";
+
 require("log-timestamp");
 
 const normalRes = "1792x1024";
@@ -23,6 +25,23 @@ export const getWeatherForecast = async (url: string) => {
     await response
       .json()
       .then((data) => (text = data.regiondata[0].products[0].text));
+
+    const parser = new xml2js.Parser();
+    parser.parseString(text, (err, result) => {
+      if (err) {
+        console.error("Error parsing XML:", err);
+        return;
+      }
+
+      // Navigate through the parsed object to find the desired text
+      const textContent =
+        result.dmi.regionkoebenhavnognordsjaelland[0]
+          .koebenhavnognordsjaelland[0].text[0];
+
+      text = textContent ?? text;
+      console.log("Extracted Text:", textContent);
+    });
+
     return text;
   } catch (error) {
     console.error("An error occurred:", error);
