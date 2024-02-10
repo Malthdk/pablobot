@@ -67,7 +67,7 @@ export const handler = async (request: FastifyRequest) => {
         {
           role: "system",
           content:
-            "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a detailed prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cubism, surrealism, abstract, digital art or impressionism. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
+            "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a detailed prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cartoonish, surrealism, abstract, digital art or photo art. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
         },
         { role: "user", content: weatherForecast },
       ],
