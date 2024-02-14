@@ -59,6 +59,8 @@ export const handler = async (request: FastifyRequest) => {
     "https://www.dmi.dk/dmidk_byvejrWS/rest/texts/2618425"
   );
 
+  const currentDateTime = new Date().toISOString();
+
   if (!weatherForecast) return "No weather forecast found!!!!!";
 
   try {
@@ -66,10 +68,12 @@ export const handler = async (request: FastifyRequest) => {
       messages: [
         {
           role: "system",
-          content:
-            "You will now act as a prompt generator. I will describe weather conditions for you, and you will create a detailed prompt that could be used for image generation. The image must also have a narrative element and tell a story. The styles should be either cartoonish, surrealism, abstract, digital art or photo art. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.",
+          content: `You will now act as a prompt generator. I will describe weather conditions for you, and you will create a detailed prompt that could be used for image generation. The image must also have a narrative element and tell a story. I will also give you a date. If there is any holidays or aniversaries for this date they should be included in the story. The styles should be either cartoonish, surrealism, abstract, digital art or photo art. You must pick a style randomly. You must also not include any temperature degrees in the prompt and it should paint a picture of the overall weather during the daytime - not taking weather transitions into account.`,
         },
-        { role: "user", content: weatherForecast },
+        {
+          role: "user",
+          content: `Weatherforecast: ${weatherForecast} - Date: ${currentDateTime}`,
+        },
       ],
       model: "gpt-4",
     });
